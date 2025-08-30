@@ -71,16 +71,21 @@ def main(input_dir: Path, output_dir: Path):
     
     # Check if ffmpeg is installed
     if not check_ffmpeg():
+        console.print("Error: ffmpeg not found")
         sys.exit(1)
     
     # Create output directory if it doesn't exist
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Find all MP4 files
+    console.print("Searching files...")
     mp4_files = find_mp4_files(input_dir)
     
     if not mp4_files:
+        console.print("No MP4 files found")
         return
+    
+    console.print(f"Found {len(mp4_files)} files")
     
     # Initialize counters
     success_count = 0
@@ -108,9 +113,12 @@ def main(input_dir: Path, output_dir: Path):
             
             # Skip if output file already exists
             if output_file.exists():
+                console.print(f"Skipped: {input_file.absolute()}")
                 skip_count += 1
                 progress.update(task, advance=1)
                 continue
+            
+            console.print(f"Processing: {input_file.absolute()}")
             
             # Convert the file
             if convert_file(input_file, output_file):
@@ -120,6 +128,8 @@ def main(input_dir: Path, output_dir: Path):
             
             progress.update(task, advance=1)
     
+    # Summary
+    console.print(f"Complete: {success_count} success, {fail_count} failed, {skip_count} skipped")
 
 if __name__ == '__main__':
     main()
