@@ -68,31 +68,19 @@ def main(input_dir: Path, output_dir: Path):
     
     The directory structure is preserved in the output folder.
     """
-    console.print("🎬 MP4 Batch Converter (M2 Optimized)", style="bold blue")
-    console.print("=" * 40)
-    console.print(f"Input:  {input_dir.absolute()}")
-    console.print(f"Output: {output_dir.absolute()}")
-    console.print()
     
     # Check if ffmpeg is installed
     if not check_ffmpeg():
-        console.print("❌ Error: ffmpeg is not installed", style="bold red")
-        console.print("Install with: brew install ffmpeg")
         sys.exit(1)
     
     # Create output directory if it doesn't exist
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Find all MP4 files
-    console.print("🔍 Searching for .mp4 files...")
     mp4_files = find_mp4_files(input_dir)
     
     if not mp4_files:
-        console.print(f"No .mp4 files found in {input_dir}")
         return
-    
-    console.print(f"Found {len(mp4_files)} .mp4 file(s)")
-    console.print()
     
     # Initialize counters
     success_count = 0
@@ -120,32 +108,18 @@ def main(input_dir: Path, output_dir: Path):
             
             # Skip if output file already exists
             if output_file.exists():
-                console.print(f"⏭️  SKIPPED: {relative_path} (already exists)")
                 skip_count += 1
                 progress.update(task, advance=1)
                 continue
             
-            console.print(f"📹 Converting: {relative_path}")
-            
             # Convert the file
             if convert_file(input_file, output_file):
-                console.print(f"✅ SUCCESS: {relative_path}", style="green")
                 success_count += 1
             else:
-                console.print(f"❌ FAILED: {relative_path}", style="red")
                 fail_count += 1
             
             progress.update(task, advance=1)
     
-    # Summary
-    console.print()
-    console.print("📊 SUMMARY", style="bold")
-    console.print("=" * 11)
-    console.print(f"✅ Successful: {success_count}")
-    console.print(f"❌ Failed: {fail_count}")
-    console.print(f"⏭️ Skipped: {skip_count}")
-    console.print()
-    console.print("🎉 Conversion complete!", style="bold green")
 
 if __name__ == '__main__':
     main()
