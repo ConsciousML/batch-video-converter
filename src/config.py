@@ -16,10 +16,14 @@ class AudioConfig(BaseModel):
 class ProcessingConfig(BaseModel):
     overwrite_output: bool = Field(..., description="Whether to overwrite existing output files")
 
+class LoggingConfig(BaseModel):
+    level: str = Field(..., description="Logging level (DEBUG, INFO, WARNING, ERROR)")
+
 class Config(BaseModel):
     video: VideoConfig
     audio: AudioConfig
     processing: ProcessingConfig
+    logging: LoggingConfig
 
 def load_config(config_path: Optional[Path] = None) -> Config:
     """
