@@ -1,64 +1,22 @@
 #!/usr/bin/env python3
 
-import os
 import sys
-import subprocess
 from pathlib import Path
-from typing import List, Tuple
 import click
 from rich.console import Console
 from rich.progress import Progress, TextColumn, BarColumn, MofNCompleteColumn, TimeRemainingColumn
 
+from src.utils import check_ffmpeg, find_video_files
+from src.convert import convert_file
+from src.config import load_config
+
 console = Console()
-
-def check_ffmpeg() -> bool:
-    """Check if ffmpeg is installed and available."""
-    try:
-        subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True)
-        return True
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return False
-
-def find_mp4_files(input_dir: Path) -> List[Path]:
-    """Find all .mp4 files recursively, excluding macOS metadata files."""
-    mp4_files = []
-    for file_path in input_dir.rglob("*.mp4"):
-        # Skip macOS metadata files that start with ._
-        if file_path.name.startswith("._"):
-            continue
-        mp4_files.append(file_path)
-    return mp4_files
-
-def convert_file(input_file: Path, output_file: Path) -> bool:
-    """Convert a single MP4 file using ffmpeg with M2 optimized settings."""
-    # Create output directory if it doesn't exist
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-    
-    # FFmpeg command with M2 optimized settings
-    cmd = [
-        'ffmpeg',
-        '-i', str(input_file),
-        '-c:v', 'hevc_videotoolbox',
-        '-crf', '23',
-        '-pix_fmt', 'p010le',
-        '-c:a', 'aac',
-        '-b:a', '128k',
-        '-tag:v', 'hvc1',
-        '-y',  # Overwrite output file
-        str(output_file)
-    ]
-    
-    try:
-        # Run ffmpeg with suppressed output
-        result = subprocess.run(cmd, capture_output=True, check=True)
-        return True
-    except subprocess.CalledProcessError:
-        return False
 
 @click.command()
 @click.argument('input_dir', type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path))
 @click.argument('output_dir', type=click.Path(path_type=Path))
-def main(input_dir: Path, output_dir: Path):
+@click.option('--config', '-c', type=click.Path(exists=True, path_type=Path), help='Path to configuration file (defaults to ./config.yml)')
+def main(input_dir: Path, output_dir: Path, config: Path):
     """
     Batch MP4 converter with M2 optimization.
     
@@ -68,18 +26,21 @@ def main(input_dir: Path, output_dir: Path):
     
     The directory structure is preserved in the output folder.
     """
-    
-    # Check if ffmpeg is installed
     if not check_ffmpeg():
         console.print("Error: ffmpeg not found")
         sys.exit(1)
+
+    try:
+        cfg = load_config(config)
+    except Exception as e:
+        console.print(f"Error loading config: {e}", style="red")
+        sys.exit(1)
     
-    # Create output directory if it doesn't exist
+    
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    # Find all MP4 files
     console.print("Searching files...")
-    mp4_files = find_mp4_files(input_dir)
+    mp4_files = find_video_files(input_dir)
     
     if not mp4_files:
         console.print("No MP4 files found")
@@ -121,7 +82,7 @@ def main(input_dir: Path, output_dir: Path):
             console.print(f"Processing: {input_file.absolute()}")
             
             # Convert the file
-            if convert_file(input_file, output_file):
+            if convert_file(input_file, output_file, cfg):
                 success_count += 1
             else:
                 fail_count += 1
