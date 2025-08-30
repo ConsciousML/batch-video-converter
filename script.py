@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import logging
 from pathlib import Path
 import click
 from rich.console import Console
@@ -9,6 +10,7 @@ from rich.progress import Progress, TextColumn, BarColumn, MofNCompleteColumn, T
 from src.utils import check_ffmpeg, find_video_files
 from src.convert import convert_file
 from src.config import load_config
+from src.metadata import MetadataManager
 
 console = Console()
 
@@ -48,6 +50,14 @@ def main(input_dir: Path, output_dir: Path, config: Path):
     
     console.print(f"Found {len(mp4_files)} files")
     
+    # Initialize metadata manager
+    metadata_manager = MetadataManager(output_dir)
+    try:
+        metadata_manager.initialize(input_dir)
+    except ValueError as e:
+        console.print(f"Error: {e}", style="red")
+        sys.exit(1)
+    
     # Initialize counters
     success_count = 0
     fail_count = 0
@@ -72,9 +82,9 @@ def main(input_dir: Path, output_dir: Path, config: Path):
             # Create output file path
             output_file = output_dir / relative_path
             
-            # Skip if output file already exists
-            if output_file.exists():
-                console.print(f"Skipped: {input_file.absolute()}")
+            # Check if file should be skipped
+            if metadata_manager.should_skip_file(input_file, output_file, cfg):
+                console.print(f"Already processed: {output_file.name}")
                 skip_count += 1
                 progress.update(task, advance=1)
                 continue
@@ -84,10 +94,15 @@ def main(input_dir: Path, output_dir: Path, config: Path):
             # Convert the file
             if convert_file(input_file, output_file, cfg):
                 success_count += 1
+                # Mark as processed in metadata
+                metadata_manager.mark_processed(input_file, cfg)
             else:
                 fail_count += 1
             
             progress.update(task, advance=1)
+    
+    # Finalize metadata
+    metadata_manager.finalize()
     
     # Summary
     console.print(f"Complete: {success_count} success, {fail_count} failed, {skip_count} skipped")

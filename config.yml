@@ -10,3 +10,6 @@ audio:
 
 processing:
   overwrite_output: true
+
+logging:
+  level: "INFO"
