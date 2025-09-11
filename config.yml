@@ -11,5 +11,8 @@ audio:
 processing:
   overwrite_output: true
 
+files:
+  input_extensions: [".mp4", ".MP4"]
+
 logging:
   level: "INFO"

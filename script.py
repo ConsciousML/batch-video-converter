@@ -42,7 +42,7 @@ def main(input_dir: Path, output_dir: Path, config: Path):
     output_dir.mkdir(parents=True, exist_ok=True)
     
     console.print("Searching files...")
-    mp4_files = find_video_files(input_dir)
+    mp4_files = find_video_files(input_dir, cfg.files.input_extensions)
     
     if not mp4_files:
         console.print("No MP4 files found")
@@ -100,9 +100,6 @@ def main(input_dir: Path, output_dir: Path, config: Path):
                 fail_count += 1
             
             progress.update(task, advance=1)
-    
-    # Finalize metadata
-    metadata_manager.finalize()
     
     # Summary
     console.print(f"Complete: {success_count} success, {fail_count} failed, {skip_count} skipped")

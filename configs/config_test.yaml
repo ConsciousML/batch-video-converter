@@ -1,0 +1,18 @@
+video:
+  codec: "hevc_videotoolbox"
+  crf: 23
+  pixel_format: "p010le"
+  tag: "hvc1"
+
+audio:
+  codec: "aac"
+  bitrate: "128k"
+
+processing:
+  overwrite_output: true
+
+files:
+  input_extensions: [".mp4", ".MP4"]
+
+logging:
+  level: "INFO"
