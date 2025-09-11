@@ -1,7 +1,7 @@
 import yaml
 from pathlib import Path
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
 class VideoConfig(BaseModel):
     codec: str = Field(..., description="Video codec to use")
@@ -19,11 +19,15 @@ class ProcessingConfig(BaseModel):
 class LoggingConfig(BaseModel):
     level: str = Field(..., description="Logging level (DEBUG, INFO, WARNING, ERROR)")
 
+class FileConfig(BaseModel):
+    input_extensions: List[str] = Field(..., description="List of input file extensions to process")
+
 class Config(BaseModel):
     video: VideoConfig
     audio: AudioConfig
     processing: ProcessingConfig
     logging: LoggingConfig
+    files: FileConfig
 
 def load_config(config_path: Optional[Path] = None) -> Config:
     """

@@ -7,6 +7,8 @@ from click.testing import CliRunner
 
 from script import main
 from src.metadata import MetadataManager
+from src.config import load_config
+from src.utils import find_video_files
 
 
 def test_video_conversion():
@@ -31,9 +33,18 @@ def test_video_conversion():
         # Check that the command succeeded
         assert result.exit_code == 0, f"Command failed with output: {result.output}"
         
-        # Check that output files were created
-        output_files = list(output_dir.rglob("*.mp4"))
+        # Load config to get file extensions for output file search
+        config = load_config(config_path)
+        
+        # Check that output files were created (search for all configured extensions)
+        output_files = []
+        for extension in config.files.input_extensions:
+            output_files.extend(output_dir.rglob(f"*{extension}"))
         assert len(output_files) > 0, "No output files were created"
+        
+        # Verify number of output files matches number of input files
+        input_files = find_video_files(input_dir, config.files.input_extensions)
+        assert len(output_files) == len(input_files), f"Output files ({len(output_files)}) != Input files ({len(input_files)})"
         
         # Verify the converted files exist and have reasonable sizes
         for output_file in output_files:

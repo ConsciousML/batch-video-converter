@@ -109,7 +109,8 @@ class MetadataManager:
         if self._metadata is None:
             raise RuntimeError("Metadata not initialized. Call initialize() first.")
         
-        # Calculate relative path from input directory
+        # Convert to absolute path and calculate relative path from input directory
+        input_file = input_file.resolve()
         input_dir = Path(self._metadata["input_dir"])
         try:
             relative_path = str(input_file.relative_to(input_dir))
@@ -154,6 +155,9 @@ class MetadataManager:
         """
         if self._metadata is None:
             raise RuntimeError("Metadata not initialized. Call initialize() first.")
+
+        # Convert to absolute path
+        input_file = input_file.resolve()
         
         # Calculate relative path from input directory
         input_dir = Path(self._metadata["input_dir"])
@@ -176,9 +180,3 @@ class MetadataManager:
         
         # Save metadata immediately after marking as processed
         self._save_metadata()
-    
-    def finalize(self):
-        """Save metadata and cleanup."""
-        if self._metadata is not None:
-            self._save_metadata()
-            self.logger.info("Metadata saved successfully")
