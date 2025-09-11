@@ -13,9 +13,11 @@ def check_ffmpeg() -> bool:
 def find_video_files(input_dir: Path) -> List[Path]:
     """Find all .mp4 files recursively, excluding macOS metadata files."""
     mp4_files = []
-    for file_path in input_dir.rglob("*.mp4"):
-        # Skip macOS metadata files that start with ._
-        if file_path.name.startswith("._"):
-            continue
-        mp4_files.append(file_path)
+    # Search for both lowercase and uppercase .mp4 files
+    for pattern in ["*.mp4", "*.MP4"]:
+        for file_path in input_dir.rglob(pattern):
+            # Skip macOS metadata files that start with ._
+            if file_path.name.startswith("._"):
+                continue
+            mp4_files.append(file_path)
     return mp4_files
