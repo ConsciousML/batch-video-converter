@@ -50,7 +50,7 @@ class MetadataManager:
     def _save_metadata(self):
         """Save metadata to file atomically."""
         if self._metadata is None:
-            return
+            raise RuntimeError("Metadata not initialized. Call initialize() first.")
         
         # Update last_updated timestamp
         self._metadata["last_updated"] = datetime.now().isoformat()
@@ -173,6 +173,9 @@ class MetadataManager:
         # Update metadata
         self._metadata["processed_files"][relative_path] = config_dict
         self.logger.info(f"Marked as processed: {relative_path}")
+        
+        # Save metadata immediately after marking as processed
+        self._save_metadata()
     
     def finalize(self):
         """Save metadata and cleanup."""
