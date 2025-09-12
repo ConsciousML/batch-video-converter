@@ -92,17 +92,26 @@ def main(input_dir: Path, output_dir: Path, config: Path):
             console.print(f"Processing: {input_file.absolute()}")
             
             # Convert the file
-            if convert_file(input_file, output_file, cfg):
+            result = convert_file(input_file, output_file, cfg)
+            if result["success"]:
                 success_count += 1
                 # Mark as processed in metadata
                 metadata_manager.mark_processed(input_file, cfg)
             else:
                 fail_count += 1
+                # Mark as failed in metadata with error output
+                metadata_manager.mark_failed(input_file, cfg, result["error_output"])
             
             progress.update(task, advance=1)
     
     # Summary
     console.print(f"Complete: {success_count} success, {fail_count} failed, {skip_count} skipped")
+    
+    # Show failure summary if there were failures
+    if fail_count > 0:
+        console.print(f"\n[red]Failed files ({fail_count}):[/red]")
+        console.print(f"Detailed error information saved to: {metadata_manager.metadata_file}")
+        console.print("Run again to retry failed files automatically.")
 
 if __name__ == '__main__':
     main()
