@@ -13,6 +13,32 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "python": "./.venv/bin/python"
+        },
+        {
+            "name": "Run success test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "tests/test_script.py::test_success",
+                "-v"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "./.venv/bin/python"
+        },
+        {
+            "name": "Run failure tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "tests/test_failure_metadata.py",
+                "-v"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "./.venv/bin/python"
         }
     ]
 }
