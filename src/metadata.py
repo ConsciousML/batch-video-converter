@@ -129,14 +129,23 @@ class MetadataManager:
             self.logger.info(f"No processing record found for: {relative_path}")
             return False
         
-        # Compare stored config with current config
-        stored_config = processed_files[relative_path].copy()
+        # Check if file failed - always retry failed files
+        file_metadata = processed_files[relative_path]
+        status = file_metadata.get("status", "success")
+        if status == "failed":
+            self.logger.info(f"Retrying previously failed file: {relative_path}")
+            return False
+        
+        # Compare stored config with current config for successful files
+        stored_config = file_metadata.copy()
         current_config_dict = current_config.model_dump()
         
         # Remove fields not relevant for comparison
         current_config_dict.pop("logging", None)
         stored_config.pop("logging", None)
         stored_config.pop("processed_at", None)
+        stored_config.pop("status", None)
+        stored_config.pop("error_output", None)
         
         if stored_config == current_config_dict:
             self.logger.info(f"Skipping already processed file: {relative_path}")
@@ -171,8 +180,9 @@ class MetadataManager:
         config_dict = config.model_dump()
         config_dict.pop("logging", None)
         
-        # Add processing timestamp
+        # Add processing timestamp and status
         config_dict["processed_at"] = datetime.now().isoformat()
+        config_dict["status"] = "success"
         
         # Update metadata
         self._metadata["processed_files"][relative_path] = config_dict
@@ -180,3 +190,63 @@ class MetadataManager:
         
         # Save metadata immediately after marking as processed
         self._save_metadata()
+    
+    def mark_failed(self, input_file: Path, config: Config, error_output: str):
+        """
+        Mark a file as failed with the given configuration and error details.
+        
+        Args:
+            input_file: Path to input file that failed processing
+            config: Configuration used for processing
+            error_output: Error output from FFmpeg
+        """
+        if self._metadata is None:
+            raise RuntimeError("Metadata not initialized. Call initialize() first.")
+
+        # Convert to absolute path
+        input_file = input_file.resolve()
+        
+        # Calculate relative path from input directory
+        input_dir = Path(self._metadata["input_dir"])
+        try:
+            relative_path = str(input_file.relative_to(input_dir))
+        except ValueError:
+            self.logger.error(f"File {input_file} is not under input directory {input_dir}")
+            return
+        
+        # Store config (excluding logging section)
+        config_dict = config.model_dump()
+        config_dict.pop("logging", None)
+        
+        # Add processing timestamp, status, and error details
+        config_dict["processed_at"] = datetime.now().isoformat()
+        config_dict["status"] = "failed"
+        config_dict["error_output"] = error_output
+        
+        # Update metadata
+        self._metadata["processed_files"][relative_path] = config_dict
+        self.logger.info(f"Marked as failed: {relative_path}")
+        
+        # Save metadata immediately after marking as failed
+        self._save_metadata()
+    
+    def get_failed_files(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Get all files that failed processing.
+        
+        Returns:
+            Dictionary mapping file paths to their failure metadata
+        """
+        if self._metadata is None:
+            raise RuntimeError("Metadata not initialized. Call initialize() first.")
+        
+        processed_files = self._metadata.get("processed_files", {})
+        failed_files = {}
+        
+        for file_path, file_metadata in processed_files.items():
+            # Handle backward compatibility - files without status are considered successful
+            status = file_metadata.get("status", "success")
+            if status == "failed":
+                failed_files[file_path] = file_metadata
+        
+        return failed_files
