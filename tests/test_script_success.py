@@ -11,12 +11,12 @@ from src.config import load_config
 from src.utils import find_video_files
 
 
-def test_video_conversion():
+def test_success():
     """Test the main video conversion functionality with real video files."""
     runner = CliRunner()
     
     # Use relative paths from the project root
-    input_dir = Path("data")
+    input_dir = Path("data/test_videos_success")
     config_path = Path("configs/config_test.yaml")
     
     # Create a temporary output directory
