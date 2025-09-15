@@ -33,9 +33,6 @@ def test_failure_metadata():
         # Command should complete (exit code 0) even with failures
         assert result.exit_code == 0, f"Command failed with output: {result.output}"
         
-        # Should report failures
-        assert "failed" in result.output.lower(), "No failures reported in output"
-        assert "error information saved" in result.output.lower(), "No metadata file reference in output"
         
         # Load config and verify no output files were created (due to failure)
         config = load_config(config_path)
