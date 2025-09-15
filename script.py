@@ -109,8 +109,10 @@ def main(input_dir: Path, output_dir: Path, config: Path):
     
     # Show failure summary if there were failures
     if fail_count > 0:
+        failed_folder = metadata_manager.write_failed_conversions_report()
         console.print(f"\n[red]Failed files ({fail_count}):[/red]")
-        console.print(f"Detailed error information saved to: {metadata_manager.metadata_file}")
+        if failed_folder:
+            console.print(f"Detailed error reports saved to: {failed_folder}")
         console.print("Run again to retry failed files automatically.")
 
 if __name__ == '__main__':

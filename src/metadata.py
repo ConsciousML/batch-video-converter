@@ -250,3 +250,39 @@ class MetadataManager:
                 failed_files[file_path] = file_metadata
         
         return failed_files
+    
+    def write_failed_conversions_report(self):
+        """
+        Write detailed failed conversions reports to individual txt files in a folder.
+        Each failed file gets its own txt file with error details.
+        
+        Returns:
+            Path to the failed conversions folder
+        """
+        if self._metadata is None:
+            raise RuntimeError("Metadata not initialized. Call initialize() first.")
+        
+        failed_files = self.get_failed_files()
+        if not failed_files:
+            return None
+        
+        failed_folder = self.output_dir / "failed_conversions"
+        failed_folder.mkdir(exist_ok=True)
+        
+        for file_path, file_metadata in failed_files.items():
+            # Create a safe filename from the relative path
+            safe_filename = file_path.replace('/', '_').replace('\\', '_')
+            report_file = failed_folder / f"{safe_filename}.txt"
+            
+            with open(report_file, 'w') as f:
+                f.write(f"FAILED CONVERSION: {file_path}\n")
+                f.write("=" * 50 + "\n\n")
+                f.write(f"Relative path from output root: {file_path}\n")
+                f.write(f"Failed at: {file_metadata.get('processed_at', 'Unknown')}\n\n")
+                f.write("Error output:\n")
+                f.write("-" * 20 + "\n")
+                error_output = file_metadata.get('error_output', 'No error details available')
+                f.write(f"{error_output}\n")
+                f.write("-" * 20 + "\n")
+        
+        return failed_folder
