@@ -1,5 +1,5 @@
 video:
-  codec: "hevc_videotoolbox"
+  codec: "libx265"
   crf: 23
   pixel_format: "p010le"
   tag: "hvc1"
