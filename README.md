@@ -16,20 +16,21 @@ Recursively processes all videos in an input directory and converts them using F
 
 ## Installation
 
-### Prerequisites
+### Option 1: Use mise (recommended)
 
-1. **FFmpeg** (required for video conversion)
-   ```bash
-   brew install ffmpeg
-   ```
+First install [mise](https://mise.jdx.dev/getting-started.html) by following their getting started guide, then:
 
-2. **uv** (Python package manager)
-   ```bash
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-   ```
+```bash
+mise install
+```
 
-### Install
+### Option 2: Install Tools Manually
 
+1. **[FFmpeg](https://ffmpeg.org/download.html)** (required for video conversion)
+2. **[Python 3.13](https://www.python.org/downloads/)**
+3. **[uv](https://docs.astral.sh/uv/getting-started/installation/)** (Python package manager)
+
+Then install dependencies:
 ```bash
 cd batch-video-converter
 uv sync
