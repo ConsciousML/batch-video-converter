@@ -56,3 +56,6 @@ The tool will:
 - **Video**: H.265 (HEVC) with libx265 codec, CRF 23, 10-bit (p010le)
 - **Audio**: AAC at 128kbps
 - **Container**: MP4 with hvc1 compatibility tag
+
+## License
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
