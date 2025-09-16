@@ -22,9 +22,7 @@ def main(input_dir: Path, output_dir: Path, config: Path):
     """
     Batch MP4 converter with M2 optimization.
     
-    Recursively converts all .mp4 files using ffmpeg with optimized settings:
-    - Video: H.265 (VideoToolbox), CRF 23, 10-bit
-    - Audio: AAC, 128kbps
+    Recursively converts all video files using ffmpeg with the settings in the `config.yaml` file
     
     The directory structure is preserved in the output folder.
     """
@@ -50,7 +48,6 @@ def main(input_dir: Path, output_dir: Path, config: Path):
     
     console.print(f"Found {len(mp4_files)} files")
     
-    # Initialize metadata manager
     metadata_manager = MetadataManager(output_dir)
     try:
         metadata_manager.initialize(input_dir)
@@ -106,14 +103,7 @@ def main(input_dir: Path, output_dir: Path, config: Path):
     
     # Summary
     console.print(f"Complete: {success_count} success, {fail_count} failed, {skip_count} skipped")
-    
-    # Show failure summary if there were failures
-    if fail_count > 0:
-        failed_folder = metadata_manager.write_failed_conversions_report()
-        console.print(f"\n[red]Failed files ({fail_count}):[/red]")
-        if failed_folder:
-            console.print(f"Detailed error reports saved to: {failed_folder}")
-        console.print("Run again to retry failed files automatically.")
+    console.print(f"Saved error logs in: {metadata_manager.failed_folder}")
 
 if __name__ == '__main__':
     main()
