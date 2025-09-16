@@ -1,58 +1,62 @@
 # Batch Video Converter
 
-A Python-based batch MP4 video converter optimized for Apple Silicon (M2) using FFmpeg with hardware acceleration.
+A CLI tool for batch video conversion using FFmpeg.
 
-## Features
+## What it does
 
-- Recursive MP4 file discovery
-- Hardware-accelerated H.265 encoding using VideoToolbox
-- Progress tracking with visual progress bars
-- Directory structure preservation
-- Skip already converted files
-- M2-optimized encoding settings
+Recursively processes all videos in an input directory and converts them using FFmpeg, preserving the original directory structure in the output folder.
+
+## Features 
+
+- Convert multiple video files with consistent settings
+- Maintain organized folder structures during batch processing
+- Resume interrupted conversions automatically
+- Log every information about each video conversion
+- Writes error logs when conversion fails
 
 ## Installation
 
-### Prerequisites
+### Option 1: Use mise (recommended)
 
-1. **FFmpeg** (required for video conversion)
-   ```bash
-   brew install ffmpeg
-   ```
-
-2. **uv** (Python package manager)
-   ```bash
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-   source ~/.local/bin/env  # or restart your shell
-   ```
-
-3. **Python 3.13+** (check with `python --version`)
-
-### Install Dependencies
+First install [mise](https://mise.jdx.dev/getting-started.html) by following their getting started guide, then:
 
 ```bash
-# Clone or navigate to the project directory
-cd batch-video-converter
+mise install
+```
 
-# Install Python dependencies
+### Option 2: Install Tools Manually
+
+1. **[FFmpeg](https://ffmpeg.org/download.html)** (required for video conversion)
+2. **[Python 3.13](https://www.python.org/downloads/)**
+3. **[uv](https://docs.astral.sh/uv/getting-started/installation/)** (Python package manager)
+
+Then install dependencies:
+```bash
+cd batch-video-converter
 uv sync
 ```
 
 ## Usage
+Modify `config.yaml` to change FFmpeg arguments if necessary.
+Read the [FFmpeg documentation](https://ffmpeg.org/ffmpeg.html) to learn more about the convertion settings.
 
 ```bash
-# Run the converter directly with uv
-uv run script.py <input_folder> <output_folder>
-
-# Or use the console script
 uv run convert-videos <input_folder> <output_folder>
 ```
 
-## Video Settings
+The tool will:
+- Process all `.mp4` files recursively from the input directory
+- Create the same directory structure in the output folder
+- Generate `.batch-video-metadata.json` to track conversion progress
+- Save error logs for failed conversions in `output_dir/failed_conversions/`
+- When re-run on existing output directory, it reads metadata and retries only failed videos
 
-The converter uses these M2-optimized settings:
-- **Video Codec**: H.265 (HEVC) with VideoToolbox hardware acceleration
-- **Quality**: CRF 23 (high quality)
-- **Pixel Format**: 10-bit (p010le)
-- **Audio Codec**: AAC at 128kbps
-- **Container**: MP4 with hvc1 tag for better compatibility
+
+## Default Settings
+
+- **Video**: H.265 (HEVC) with libx265 codec, CRF 23, 10-bit (p010le)
+- **Audio**: AAC at 128kbps
+- **Container**: MP4 with hvc1 compatibility tag
+
+## License
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
