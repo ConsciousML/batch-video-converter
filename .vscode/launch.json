@@ -20,7 +20,7 @@
             "request": "launch",
             "module": "pytest",
             "args": [
-                "tests/test_script.py::test_success",
+                "tests/test_script_success.py",
                 "-v"
             ],
             "console": "integratedTerminal",

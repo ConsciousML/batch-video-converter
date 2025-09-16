@@ -69,21 +69,13 @@ def test_failure_metadata():
             assert "processed_at" in file_metadata, f"Missing processed_at for {file_path}"
             assert "status" in file_metadata, f"Missing status for {file_path}"
             assert file_metadata["status"] == "failed", f"Status should be 'failed' for {file_path}"
-            assert "error_output" in file_metadata, f"Missing error_output for {file_path}"
-            assert file_metadata["error_output"] is not None, f"Error output should not be None for {file_path}"
-            assert len(file_metadata["error_output"]) > 0, f"Error output should not be empty for {file_path}"
+            assert "error_log_file_path" in file_metadata, f"Missing error output file path for {file_path}"
         
         # Test get_failed_files method
-        failed_files = metadata_manager.get_failed_files()
-        assert len(failed_files) > 0, "get_failed_files() returned no failures"
-        assert len(failed_files) == len(processed_files), "get_failed_files() count mismatch"
+        nb_failed_files = len([file for file in metadata_manager.failed_folder.iterdir() if file.is_file()])
+        assert nb_failed_files > 0, "get_failed_files() returned no failures"
+        assert nb_failed_files == len(processed_files), "get_failed_files() count mismatch"
         
-        # Verify failed files structure
-        for file_path, file_metadata in failed_files.items():
-            assert file_metadata["status"] == "failed", f"get_failed_files() returned non-failed file: {file_path}"
-            assert "error_output" in file_metadata, f"Failed file missing error_output: {file_path}"
-
-
 def test_failure_retry_behavior():
     """Test that failed files are automatically retried on subsequent runs."""
     runner = CliRunner()

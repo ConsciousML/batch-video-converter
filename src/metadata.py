@@ -19,6 +19,7 @@ class MetadataManager:
             output_dir: Directory where output files and metadata are stored
         """
         self.output_dir = output_dir
+        self.failed_folder = self.output_dir / "failed_conversions"
         self.logger = logging.getLogger(__name__)
         self.metadata_file = output_dir / self.METADATA_FILENAME
         self._metadata: Optional[Dict[str, Any]] = None
@@ -183,6 +184,7 @@ class MetadataManager:
         # Add processing timestamp and status
         config_dict["processed_at"] = datetime.now().isoformat()
         config_dict["status"] = "success"
+        config_dict["error_log_file_path"] = None
         
         # Update metadata
         self._metadata["processed_files"][relative_path] = config_dict
@@ -221,68 +223,33 @@ class MetadataManager:
         # Add processing timestamp, status, and error details
         config_dict["processed_at"] = datetime.now().isoformat()
         config_dict["status"] = "failed"
-        config_dict["error_output"] = error_output
         
         # Update metadata
         self._metadata["processed_files"][relative_path] = config_dict
         self.logger.info(f"Marked as failed: {relative_path}")
         
+        # Save error logs
+        error_log_file_path = self.write_failed_logs(relative_path, error_output)
+        config_dict["error_log_file_path"] = error_log_file_path
+
         # Save metadata immediately after marking as failed
         self._save_metadata()
-    
-    def get_failed_files(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Get all files that failed processing.
-        
+
+    def write_failed_logs(self, file_path: str, error_output: str) -> str:
+        """Write error logs for a failed file conversion to a text file.
+
+        Args:
+            file_path: Relative path of the file that failed conversion
+            error_output: Error output from the conversion process
+
         Returns:
-            Dictionary mapping file paths to their failure metadata
+            str: File path of the error log file.
         """
-        if self._metadata is None:
-            raise RuntimeError("Metadata not initialized. Call initialize() first.")
-        
-        processed_files = self._metadata.get("processed_files", {})
-        failed_files = {}
-        
-        for file_path, file_metadata in processed_files.items():
-            # Handle backward compatibility - files without status are considered successful
-            status = file_metadata.get("status", "success")
-            if status == "failed":
-                failed_files[file_path] = file_metadata
-        
-        return failed_files
-    
-    def write_failed_conversions_report(self):
-        """
-        Write detailed failed conversions reports to individual txt files in a folder.
-        Each failed file gets its own txt file with error details.
-        
-        Returns:
-            Path to the failed conversions folder
-        """
-        if self._metadata is None:
-            raise RuntimeError("Metadata not initialized. Call initialize() first.")
-        
-        failed_files = self.get_failed_files()
-        if not failed_files:
-            return None
-        
-        failed_folder = self.output_dir / "failed_conversions"
-        failed_folder.mkdir(exist_ok=True)
-        
-        for file_path, file_metadata in failed_files.items():
-            # Create a safe filename from the relative path
-            safe_filename = file_path.replace('/', '_').replace('\\', '_')
-            report_file = failed_folder / f"{safe_filename}.txt"
-            
-            with open(report_file, 'w') as f:
-                f.write(f"FAILED CONVERSION: {file_path}\n")
-                f.write("=" * 50 + "\n\n")
-                f.write(f"Relative path from output root: {file_path}\n")
-                f.write(f"Failed at: {file_metadata.get('processed_at', 'Unknown')}\n\n")
-                f.write("Error output:\n")
-                f.write("-" * 20 + "\n")
-                error_output = file_metadata.get('error_output', 'No error details available')
-                f.write(f"{error_output}\n")
-                f.write("-" * 20 + "\n")
-        
-        return failed_folder
+        self.failed_folder.mkdir(exist_ok=True)
+
+        safe_filename = file_path.replace('/', '_').replace('\\', '_')
+
+        error_log_file_path = f'{self.failed_folder / safe_filename}.txt'
+        with open(error_log_file_path, 'w') as file:
+            file.write(f"{error_output}\n")
+        return error_log_file_path
