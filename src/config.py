@@ -21,6 +21,7 @@ class LoggingConfig(BaseModel):
 
 class FileConfig(BaseModel):
     input_extensions: List[str] = Field(..., description="List of input file extensions to process")
+    ignore: List[str] = Field(default=[], description="List of regex patterns for files/folders to ignore")
 
 class Config(BaseModel):
     video: VideoConfig

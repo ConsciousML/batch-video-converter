@@ -7,7 +7,7 @@ import click
 from rich.console import Console
 from rich.progress import Progress, TextColumn, BarColumn, MofNCompleteColumn, TimeRemainingColumn
 
-from src.utils import check_ffmpeg, find_video_files
+from src.utils import check_ffmpeg, find_video_files, filter_ignored_files
 from src.convert import convert_file
 from src.config import load_config
 from src.metadata import MetadataManager
@@ -41,7 +41,8 @@ def main(input_dir: Path, output_dir: Path, config: Path):
     
     console.print("Searching files...")
     mp4_files = find_video_files(input_dir, cfg.files.input_extensions)
-    
+    mp4_files = filter_ignored_files(mp4_files, cfg.files.ignore)
+
     if not mp4_files:
         console.print("No MP4 files found")
         return

@@ -13,6 +13,7 @@ processing:
 
 files:
   input_extensions: [".mp4", ".MP4"]
+  ignore: ["*.fcpbundle"]
 
 logging:
   level: "INFO"

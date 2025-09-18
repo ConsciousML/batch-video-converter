@@ -1,4 +1,5 @@
 import subprocess
+import re
 from pathlib import Path
 from typing import List
 from src.config import Config
@@ -31,3 +32,36 @@ def find_video_files(input_dir: Path, input_extensions: List[str]) -> List[Path]
                 continue
             video_files.append(file_path)
     return video_files
+
+def filter_ignored_files(video_files: List[Path], ignore_patterns: List[str]) -> List[Path]:
+    """Filter out files and folders that match ignore patterns.
+
+    Args:
+        video_files: List of video file paths to filter.
+        ignore_patterns: List of regex patterns for files/folders to ignore.
+
+    Returns:
+        List of Path objects for files that don't match any ignore pattern.
+    """
+    if not ignore_patterns:
+        return video_files
+
+    filtered_files = []
+    for file_path in video_files:
+        file_str = str(file_path)
+        should_ignore = False
+
+        for pattern in ignore_patterns:
+            try:
+                # Check if the pattern matches any part of the file path
+                if re.search(pattern, file_str):
+                    should_ignore = True
+                    break
+            except re.error:
+                # Skip invalid regex patterns
+                continue
+
+        if not should_ignore:
+            filtered_files.append(file_path)
+
+    return filtered_files
