@@ -43,8 +43,8 @@ def test_success():
         assert len(output_files) > 0, "No output files were created"
         
         # Verify number of output files matches number of input files
-        input_files = find_video_files(input_dir, config.files.input_extensions)
-        assert len(output_files) == len(input_files), f"Output files ({len(output_files)}) != Input files ({len(input_files)})"
+        # `test.fcpbundle/empty.mp4` should be ignored
+        assert len(output_files) == 2, f"Output files ({len(output_files)}) != Input files 2"
         
         # Verify the converted files exist and have reasonable sizes
         for output_file in output_files:
