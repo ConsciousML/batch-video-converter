@@ -1,9 +1,7 @@
 import subprocess
-import re
 import fnmatch
 from pathlib import Path
 from typing import List
-from src.config import Config
 
 def check_ffmpeg() -> bool:
     """Check if ffmpeg is installed and available."""

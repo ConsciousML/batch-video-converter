@@ -39,6 +39,19 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "python": "./.venv/bin/python"
+        },
+        {
+            "name": "Run script.py with batch conversion",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/script.py",
+            "args": [
+                "/Volumes/WD Elements 2620 Media/Youtube Hard Drive/Batch",
+                "/Users/consciousml/Documents/Youtube Videos"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "./.venv/bin/python"
         }
     ]
 }

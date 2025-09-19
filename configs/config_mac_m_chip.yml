@@ -1,0 +1,20 @@
+video:
+  #codec: "libx265"
+  codec: "hevc_videotoolbox" # Mac M chip acceleration
+  crf: 23
+  pixel_format: "p010le"
+  tag: "hvc1"
+
+audio:
+  codec: "aac"
+  bitrate: "128k"
+
+processing:
+  overwrite_output: true
+
+files:
+  input_extensions: [".mp4", ".MP4"]
+  ignore: ["*.fcpbundle"]
+
+logging:
+  level: "INFO"

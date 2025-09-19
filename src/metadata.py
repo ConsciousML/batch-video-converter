@@ -147,6 +147,8 @@ class MetadataManager:
         stored_config.pop("processed_at", None)
         stored_config.pop("status", None)
         stored_config.pop("error_output", None)
+
+        current_config_dict["error_log_file_path"] = None
         
         if stored_config == current_config_dict:
             self.logger.info(f"Skipping already processed file: {relative_path}")
