@@ -138,17 +138,22 @@ class MetadataManager:
             return False
         
         # Compare stored config with current config for successful files
+        def compare_relevant_config(stored: dict, current: dict) -> bool:
+            """Compare only audio and video configuration."""
+            stored_filtered = {
+                "audio": stored.get("audio"),
+                "video": stored.get("video")
+            }
+            current_filtered = {
+                "audio": current.get("audio"),
+                "video": current.get("video")
+            }
+            return stored_filtered == current_filtered
+
         stored_config = file_metadata.copy()
         current_config_dict = current_config.model_dump()
-        
-        # Remove fields not relevant for comparison
-        current_config_dict.pop("logging", None)
-        stored_config.pop("logging", None)
-        stored_config.pop("processed_at", None)
-        stored_config.pop("status", None)
-        stored_config.pop("error_output", None)
-        
-        if stored_config == current_config_dict:
+
+        if compare_relevant_config(stored_config, current_config_dict):
             self.logger.info(f"Skipping already processed file: {relative_path}")
             return True
         else:
